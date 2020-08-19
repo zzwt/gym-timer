@@ -1,65 +1,155 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { useState } from "react";
+import Head from "next/head";
+import { Container, Header, Form, Dropdown, Button } from "semantic-ui-react";
+import ExercisePlan from "../components/ExercisePlan";
+const exerciseNames = [
+  "Crunches",
+  "Toe Taps with Jumps",
+  "Jumping Jacks",
+  "Burpees",
+  "Froggy Jumps",
+  "Front Kick Lunge",
+  "Jog in Place",
+  "Jog with High Knees",
+  "Lunges",
+  "Mountain Climbers",
+  "Plank",
+  "Plyo Lunges",
+  "Plyo Jacks",
+  "Prisoner Squat Jumps",
+  "Push ups",
+  "Reverse Crunches",
+  "Russian twists",
+  "Side to Side Jumping Lunges",
+  "Squat Jumps",
+  "Squats",
+];
+
+const generateExerciseNames = () =>
+  exerciseNames.map((x, index) => ({
+    key: index,
+    text: x,
+    value: x,
+  }));
+
+const generateExerciseTime = (firstItem, count, interval) => {
+  let series = [];
+  for (let i = 0; i < count; i++) {
+    series.push(firstItem + i * interval);
+  }
+
+  return series.map((x, index) => ({
+    key: index,
+    text: `${x} seconds`,
+    value: x,
+  }));
+};
+
+const generateRounds = (rounds) => {
+  return [...Array(rounds).keys()].map((x, index) => ({
+    key: index,
+    text: `Round ${x + 1} `,
+    value: x + 1,
+  }));
+};
 
 export default function Home() {
+  const [exerciseName, setExerciseName] = useState("Crunches");
+  const [exerciseTime, setExerciseTime] = useState(5);
+  const [restTime, setRestTime] = useState(5);
+  const [round, setRound] = useState(1);
+  const [exercises, setExercises] = useState({});
+
+  const onDelete = (round, index) => {
+    if (!exercises[round]) return;
+    exercises[round].splice(index, 1);
+    if (exercises[round].length === 0) delete exercises[round];
+    setExercises({ ...exercises });
+  };
+
+  const onExerciseNameChange = (_, data) => {
+    setExerciseName(data.value);
+  };
+
+  const onExerciseTimeChange = (_, data) => {
+    setExerciseTime(data.value);
+  };
+
+  const onRestTimeChange = (_, data) => {
+    setRestTime(data.value);
+  };
+
+  const onRoundChange = (_, data) => {
+    setRound(data.value);
+  };
+
+  const addExercise = () => {
+    const exercisesInRound = exercises[round] ? exercises[round] : [];
+    exercisesInRound.push({
+      exerciseName,
+      exerciseTime,
+      restTime,
+    });
+    setExercises({ ...exercises, [round]: exercisesInRound });
+  };
+
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>Create Next App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Container>
+        <Header as="h2" textAlign="center">
+          Create Your Timer
+        </Header>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+        <Form>
+          <Form.Group widths="equal">
+            <Form.Dropdown
+              label={`Exercise: ${exerciseName}`}
+              placeholder="Select Exercise"
+              defaultValue={exerciseName}
+              selection
+              search
+              options={generateExerciseNames()}
+              onChange={onExerciseNameChange}
+            />
+            <Form.Dropdown
+              label={`Exercise Time: ${exerciseTime} seconds`}
+              placeholder="Select Exercise Time"
+              selection
+              defaultValue={exerciseTime}
+              options={generateExerciseTime(5, 19, 5)}
+              onChange={onExerciseTimeChange}
+            />
+            <Form.Dropdown
+              label={`Rest Time: ${restTime} seconds`}
+              placeholder="Select Rest Time"
+              selection
+              defaultValue={restTime}
+              options={generateExerciseTime(5, 19, 5)}
+              onChange={onRestTimeChange}
+            />
+            <Form.Dropdown
+              label={`Add to Round: ${round}`}
+              placeholder="Select Destination Round"
+              selection
+              defaultValue={round}
+              options={generateRounds(10)}
+              onChange={onRoundChange}
+            />
+          </Form.Group>
+          <Button
+            content={`Add Exercise to Round ${round}`}
+            color="teal"
+            fluid
+            onClick={addExercise}
+            style={{ marginBottom: "16px" }}
+          ></Button>
+          <ExercisePlan exercises={exercises} removeExercise={onDelete} />
+        </Form>
+      </Container>
     </div>
-  )
+  );
 }
