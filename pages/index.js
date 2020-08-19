@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import { Container, Header, Form, Dropdown, Button } from "semantic-ui-react";
 import ExercisePlan from "../components/ExercisePlan";
@@ -60,11 +60,19 @@ export default function Home() {
   const [round, setRound] = useState(1);
   const [exercises, setExercises] = useState({});
 
-  const onDelete = (round, index) => {
+  useEffect(() => {
+    const loadedExercises = localStorage.getItem("exercises");
+    if (loadedExercises)
+      setExercises(JSON.parse(localStorage.getItem("exercises")));
+  }, []);
+
+  const removeExercise = (round, index) => {
     if (!exercises[round]) return;
     exercises[round].splice(index, 1);
     if (exercises[round].length === 0) delete exercises[round];
-    setExercises({ ...exercises });
+    const newExercises = { ...exercises };
+    setExercises(newExercises);
+    localStorage.setItem("exercises", JSON.stringify(newExercises));
   };
 
   const onExerciseNameChange = (_, data) => {
@@ -90,7 +98,9 @@ export default function Home() {
       exerciseTime,
       restTime,
     });
-    setExercises({ ...exercises, [round]: exercisesInRound });
+    const newExercises = { ...exercises, [round]: exercisesInRound };
+    setExercises(newExercises);
+    localStorage.setItem("exercises", JSON.stringify(newExercises));
   };
 
   return (
@@ -147,7 +157,7 @@ export default function Home() {
             onClick={addExercise}
             style={{ marginBottom: "16px" }}
           ></Button>
-          <ExercisePlan exercises={exercises} removeExercise={onDelete} />
+          <ExercisePlan exercises={exercises} removeExercise={removeExercise} />
         </Form>
       </Container>
     </div>
