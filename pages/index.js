@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import { Container, Header, Form, Dropdown, Button } from "semantic-ui-react";
 import ExercisePlan from "../components/ExercisePlan";
+import Heading from "../components/Heading";
+import status from "../status";
+
 const exerciseNames = [
   "Crunches",
   "Toe Taps with Jumps",
@@ -97,6 +100,8 @@ export default function Home() {
       exerciseName,
       exerciseTime,
       restTime,
+      elapsedExerciseTime: 0,
+      elapsedRestTime: 0,
     });
     const newExercises = { ...exercises, [round]: exercisesInRound };
     setExercises(newExercises);
@@ -106,14 +111,14 @@ export default function Home() {
   return (
     <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Gym Timer</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container>
-        <Header as="h2" textAlign="center">
+        <Heading></Heading>
+        <Header as="h2" textAlign="center" style={{ marginTop: "80px" }}>
           Create Your Timer
         </Header>
-
         <Form>
           <Form.Group widths="equal">
             <Form.Dropdown
@@ -152,10 +157,12 @@ export default function Home() {
           </Form.Group>
           <Button
             content={`Add Exercise to Round ${round}`}
-            color="teal"
+            color="green"
             fluid
             onClick={addExercise}
-            style={{ marginBottom: "16px" }}
+            style={{
+              marginBottom: "16px",
+            }}
           ></Button>
           <ExercisePlan exercises={exercises} removeExercise={removeExercise} />
         </Form>
