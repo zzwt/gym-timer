@@ -62,6 +62,7 @@ export default function Home() {
   const [restTime, setRestTime] = useState(5);
   const [round, setRound] = useState(1);
   const [exercises, setExercises] = useState({});
+  const [activeStatus, setActiveStatus] = useState(null);
 
   useEffect(() => {
     const loadedExercises = localStorage.getItem("exercises");
@@ -106,6 +107,22 @@ export default function Home() {
     const newExercises = { ...exercises, [round]: exercisesInRound };
     setExercises(newExercises);
     localStorage.setItem("exercises", JSON.stringify(newExercises));
+  };
+
+  const updateSnapshot = ({
+    round,
+    name,
+    exerciseTime,
+    restTime,
+    inRest,
+    exercisePct,
+    remaining,
+    percentage,
+  }) => {
+    console.log(
+      `snapshot: round: ${round}, name: ${name}, exerciseTime: ${exerciseTime},restTime: ${restTime}, inRest: ${inRest}, exercisePct: ${exercisePct},remaining: ${remaining}, percentage: ${percentage}
+      `
+    );
   };
 
   return (
@@ -164,7 +181,11 @@ export default function Home() {
               marginBottom: "16px",
             }}
           ></Button>
-          <ExercisePlan exercises={exercises} removeExercise={removeExercise} />
+          <ExercisePlan
+            exercises={exercises}
+            removeExercise={removeExercise}
+            updateSnapshot={updateSnapshot}
+          />
         </Form>
       </Container>
     </div>

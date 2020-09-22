@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { Card, Header, Button } from "semantic-ui-react";
-import status from "../status";
-export default function Exercise({ exercise, children, id, nextTimer, mode }) {
+import React, { useState, useEffect, useContext } from "react";
+import activeContext from "../context/activeContext.js";
+export default function Exercise({
+  exercise,
+  children,
+  id,
+  nextTimer,
+  round,
+  mode,
+  activeTimerIndex,
+}) {
   const [timer, setTimer] = useState(null);
   const [inRest, setInRest] = useState(false);
   const [remainingExerciseTime, setRemainingExerciseTime] = useState(
     exercise.exerciseTime
   );
+  const [percentage, setPercentage] = useState(0);
+  const { updateActiveExercise } = useContext(activeContext);
 
   useEffect(() => {
     if (remainingExerciseTime === 0) {
@@ -20,27 +29,48 @@ export default function Exercise({ exercise, children, id, nextTimer, mode }) {
   }, [remainingExerciseTime]);
 
   // issues
-  // useEffect(() => {
-  //   console.log(inRest, timer, "in use effect");
-  //   if (inRest) {
-  //     resetTimer(exercise.restTime);
-  //     // startTimer(exercise.restTime);
-  //   }
-  // }, [inRest, timer]);
+  useEffect(() => {
+    if (inRest) {
+      setRemainingExerciseTime(exercise.restTime);
+    }
+  }, [inRest, timer]);
+
+  useEffect(() => {
+    if (percentage !== 0 || activeTimerIndex === id) {
+      updateActiveExercise({
+        id,
+        round,
+        name: exercise.exerciseName,
+        remainingExerciseTime,
+        inRest,
+        percentage,
+      });
+    }
+  }, [percentage, activeTimerIndex]);
 
   const startTimer = (t = remainingExerciseTime) => {
     let timeLeft = t;
-    console.log("toggle timer left time", timeLeft);
-    console.log("timer is", timer);
+    let localInRest = inRest;
     if (!timer) {
       const t = setInterval(() => {
         if (timeLeft === 0) {
           timeLeft = exercise.restTime;
+          localInRest = true;
         }
         timeLeft = timeLeft - 1;
+        setPercentage(
+          Math.round(
+            ((localInRest
+              ? exercise.exerciseTime + exercise.restTime - timeLeft
+              : exercise.exerciseTime - timeLeft) /
+              (exercise.exerciseTime + exercise.restTime)) *
+              100
+          )
+        );
 
         setRemainingExerciseTime(timeLeft);
       }, 1000);
+
       setTimer(t);
     }
   };
@@ -51,36 +81,20 @@ export default function Exercise({ exercise, children, id, nextTimer, mode }) {
   };
 
   const stopTimer = () => {
-    console.log("instop timer", timer);
     if (timer) {
-      console.log("clearing interval");
       clearInterval(timer);
       setTimer(null);
     }
   };
 
   return children({
+    id,
     startTimer,
     stopTimer,
     resetTimer,
     remainingExerciseTime,
     id,
     inRest,
+    percentage,
   });
-  // <Card>
-  //   <Card.Content textAlign="center">
-  //     <Card.Header content={exerciseName}></Card.Header>
-
-  //     <Card.Description>
-  //       {`Exercise Time: ${exerciseTime}s Rest Time: ${restTime}s`}
-  //     </Card.Description>
-  //     <Button
-  //       icon="trash alternate outline"
-  //       onClick={onDelete}
-  //       content="Remove"
-  //       color="orange"
-  //       disabled={disabled}
-  //     />
-  //   </Card.Content>
-  // </Card>
 }

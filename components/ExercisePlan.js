@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Card, Header, Button } from "semantic-ui-react";
 import Exercise from "./Exercise";
 import status from "../status";
 
 export default function ExercisePlan({ exercises, removeExercise }) {
   const [mode, setMode] = useState(status.START);
-  // const [timer, setTimer] = useState(null);
-  //const [timers, setTimers] = useState([]);
   const [activeTimerIndex, setActiveTimerIndex] = useState(null);
+
   let timers = [];
 
   const nextTimer = () => {
@@ -38,24 +37,22 @@ export default function ExercisePlan({ exercises, removeExercise }) {
               return (
                 <Exercise
                   key={index}
+                  round={key}
+                  activeTimerIndex={activeTimerIndex}
                   exercise={exercise}
                   id={timerIndex++}
                   nextTimer={nextTimer}
                   mode={mode}
-                  // onDelete={}
-                  // disabled={}
                 >
                   {(snapshot) => {
-                    console.log("shanpshotting, timers is ", timers);
+                    if (
+                      mode !== status.START &&
+                      activeTimerIndex === snapshot.id
+                    ) {
+                    }
                     if (!timers[snapshot.id]) {
                       timers.push(snapshot);
-                      // setTimers([...timers]);
                     }
-                    //  else {
-                    //   // timers[snapshot.id] = snapshot;
-                    //   // setTimers([...timers]);
-                    //   timers.splice(snapshot.id, 1, snapshot);
-                    // }
                     return (
                       <Card>
                         <Card.Content textAlign="center">
@@ -92,24 +89,14 @@ export default function ExercisePlan({ exercises, removeExercise }) {
   const toggleExercise = () => {
     if (timers.length > 0) {
       if (mode === status.START) {
-        // const timer = setInterval(() => {
-        //   console.log("exercising");
-        // }, 1000);
-        // setTimer(timer);
         const index = 0;
         setActiveTimerIndex(index);
-        timers[index].startTimer();
         setMode(status.EXERCISING);
+        timers[index].startTimer();
       } else if (mode === status.EXERCISING) {
-        // clearInterval(timer);
-        // setTimer(null);
         setMode(status.STOPPED);
         timers[activeTimerIndex].stopTimer();
       } else if (mode === status.STOPPED) {
-        // const timer = setInterval(() => {
-        //   console.log("exercising");
-        // }, 1000);
-        // setTimer(timer);
         timers[activeTimerIndex].startTimer();
         setMode(status.EXERCISING);
       }
